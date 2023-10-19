@@ -9,39 +9,22 @@ import {
   HTTP_SERVER_ERROR,
 } from "../utils/status.js";
 import db from "../db.js";
-import { articles, insertArticleSchema } from "../schema.js";
-import { eq } from "drizzle-orm";
+import { presences, insertPresenceSchema, users } from "../schema.js";
+import { eq, isNull } from "drizzle-orm";
 
 const router = express.Router();
 
 router.get(
   "/",
-  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    try {
-      const allArticles = await db.select().from(articles);
-      return res.status(HTTP_OK).json(allArticles);
-    } catch (error: any) {
-      console.error(error.message);
-      return res.status(HTTP_SERVER_ERROR).json({ error });
-    }
-  }
-);
-
-router.get(
-  "/id/:id",
   auth,
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      const allArticles = await db
+      const allPresences = await db
         .select()
-        .from(articles)
-        .where(eq(articles.id, req.params.id));
-      if (allArticles.length === 0) {
-        return res
-          .status(HTTP_NOT_FOUND)
-          .json({ message: "Article non trouvé" });
-      }
-      return res.status(HTTP_OK).json({ article: allArticles[0] });
+        .from(presences)
+        .where(isNull(presences.fin))
+        .innerJoin(users, eq(presences.user, users.id));
+      return res.status(HTTP_OK).json(allPresences);
     } catch (error: any) {
       console.error(error.message);
       return res.status(HTTP_SERVER_ERROR).json({ error });
@@ -57,9 +40,12 @@ router.post(
       if (req.role !== "admin") {
         return res.status(HTTP_FORBIDDEN).json({ message: "Non autorisé" });
       }
-      const article = insertArticleSchema.parse(req.body);
-      await db.insert(articles).values(article);
-      return res.status(HTTP_OK).json({ message: "Article ajouté !" });
+      const presence = insertPresenceSchema.parse({
+        ...req.body,
+        user: req.user,
+      });
+      await db.insert(presences).values(presence);
+      return res.status(HTTP_OK).json({ message: "Presence ajouté !" });
     } catch (error: any) {
       console.error(error.message);
       return res.status(HTTP_SERVER_ERROR).json({ error });
@@ -75,18 +61,21 @@ router.put(
       if (req.role !== "admin") {
         return res.status(HTTP_FORBIDDEN).json({ message: "Non autorisé" });
       }
-      const allArticles = await db
+      const allPresences = await db
         .select()
-        .from(articles)
-        .where(eq(articles.id, req.params.id));
-      if (allArticles.length === 0) {
+        .from(presences)
+        .where(eq(presences.id, req.params.id));
+      if (allPresences.length === 0) {
         return res
           .status(HTTP_NOT_FOUND)
-          .json({ message: "Article non trouvé" });
+          .json({ message: "Presence non trouvé" });
       }
-      const article = insertArticleSchema.parse(req.body);
-      await db.update(articles).set(article);
-      return res.status(HTTP_OK).json({ message: "Article modifié !" });
+      const presence = insertPresenceSchema.parse({
+        ...req.body,
+        user: req.user,
+      });
+      await db.update(presences).set({ fin: presence.fin });
+      return res.status(HTTP_OK).json({ message: "Presence modifié !" });
     } catch (error: any) {
       console.error(error.message);
       return res.status(HTTP_SERVER_ERROR).json({ error });
@@ -102,7 +91,7 @@ router.delete(
         return res.status(HTTP_FORBIDDEN).json({ message: "Non autorisé" });
       }
       const { id } = req.params;
-      await db.delete(articles).where(eq(articles.id, id));
+      await db.delete(presences).where(eq(presences.id, id));
     } catch (error: any) {
       console.error(error.message);
       return res.status(HTTP_SERVER_ERROR).json({ error });
