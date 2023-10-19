@@ -1,4 +1,4 @@
-import express, { Response, NextFunction, Request } from "express";
+import express, { Response, NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { auth } from "../utils/auth.js";
 import { jwtGenerator } from "../utils/jwtGenerator.js";
@@ -12,7 +12,7 @@ import {
   HTTP_SERVER_ERROR,
 } from "../utils/status.js";
 import db from "../db.js";
-import { users, selectUserSchema, insertUserSchema } from "../schema.js";
+import { users, insertUserSchema, connectUserSchema } from "../schema.js";
 import { eq } from "drizzle-orm";
 
 const router = express.Router();
@@ -96,7 +96,7 @@ router.get(
   }
 );
 
-router.post("/login", async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     const allUsers = await db
       .select()
@@ -119,11 +119,11 @@ router.post(
   "/connect",
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      const { mail, password } = req.body;
+      const { mail, password } = connectUserSchema.parse(req.body);
       const allUsers = await db
         .select()
         .from(users)
-        .where(eq(mail, users.mail));
+        .where(eq(users.mail, mail));
       if (allUsers.length === 0) {
         return res
           .status(HTTP_NOT_FOUND)
