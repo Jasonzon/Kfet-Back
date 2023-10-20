@@ -9,7 +9,7 @@ import {
   HTTP_SERVER_ERROR,
 } from "../utils/status.js";
 import db from "../db.js";
-import { paiements, insertPaiementSchema } from "../schema.js";
+import { paiements, insertPaiementSchema, users } from "../schema.js";
 import { eq } from "drizzle-orm";
 
 const router = express.Router();
@@ -23,6 +23,24 @@ router.get(
         return res.status(HTTP_FORBIDDEN).json({ message: "Non autorisé" });
       }
       const allPaiements = await db.select().from(paiements);
+      return res.status(HTTP_OK).json(allPaiements);
+    } catch (error: any) {
+      console.error(error.message);
+      return res.status(HTTP_SERVER_ERROR).json({ error });
+    }
+  }
+);
+
+router.get(
+  "/total",
+  auth,
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      const allPaiements = await db
+        .select()
+        .from(paiements)
+        .innerJoin(users, eq(users.id, paiements.user))
+        .groupBy(paiements.user);
       return res.status(HTTP_OK).json(allPaiements);
     } catch (error: any) {
       console.error(error.message);
@@ -50,7 +68,7 @@ router.post(
 );
 
 router.put(
-  "/id/:id",
+  "/:id",
   auth,
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -78,6 +96,7 @@ router.put(
 
 router.delete(
   "/:id",
+  auth,
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (req.user.toString() !== req.body.user.toString()) {

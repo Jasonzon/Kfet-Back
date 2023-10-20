@@ -35,7 +35,7 @@ router.get(
 );
 
 router.get(
-  "/id/:id",
+  "/:id",
   auth,
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -96,24 +96,28 @@ router.get(
   }
 );
 
-router.post("/", async (req, res) => {
-  try {
-    const allUsers = await db
-      .select()
-      .from(users)
-      .where(eq(users.mail, req.body.mail));
-    if (allUsers.length === 0) {
-      const user = insertUserSchema.parse(req.body);
-      await db.insert(users).values(user);
+router.post(
+  "/",
+  auth,
+  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      const allUsers = await db
+        .select()
+        .from(users)
+        .where(eq(users.mail, req.body.mail));
+      if (allUsers.length === 0) {
+        const user = insertUserSchema.parse(req.body);
+        await db.insert(users).values(user);
+      }
+      const user = allUsers[0];
+      const token = jwtGenerator(user.id, user.role, user.mail);
+      return res.status(HTTP_OK).json({ user, token });
+    } catch (error) {
+      console.error(error);
+      return res.sendStatus(HTTP_SERVER_ERROR);
     }
-    const user = allUsers[0];
-    const token = jwtGenerator(user.id, user.role, user.mail);
-    return res.status(HTTP_OK).json({ user, token });
-  } catch (error) {
-    console.error(error);
-    return res.sendStatus(HTTP_SERVER_ERROR);
   }
-});
+);
 
 router.post(
   "/connect",
@@ -146,7 +150,7 @@ router.post(
 );
 
 router.put(
-  "/id/:id",
+  "/:id",
   auth,
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {

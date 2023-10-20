@@ -54,7 +54,7 @@ router.post(
 );
 
 router.put(
-  "/id/:id",
+  "/:id",
   auth,
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -85,6 +85,7 @@ router.put(
 
 router.delete(
   "/:id",
+  auth,
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (req.role !== "admin") {
