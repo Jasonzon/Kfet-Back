@@ -1,4 +1,4 @@
-import { InferInsertModel, InferSelectModel } from "drizzle-orm";
+import { InferInsertModel, InferSelectModel, sql } from "drizzle-orm";
 import {
   pgTable,
   uuid,
@@ -13,7 +13,9 @@ import { createSelectSchema, createInsertSchema } from "drizzle-zod";
 export const role = pgEnum("role", ["basic", "admin"]);
 
 export const users = pgTable("users", {
-  id: uuid("id").primaryKey(),
+  id: uuid("id")
+    .default(sql`gen_random_uuid()`)
+    .primaryKey(),
   nom: text("nom").notNull(),
   prenom: text("prenom").notNull(),
   tel: varchar("tel", { length: 256 }).notNull(),
@@ -33,7 +35,9 @@ export const connectUserSchema = selectUserSchema.pick({
 });
 
 export const articles = pgTable("articles", {
-  id: uuid("id").primaryKey(),
+  id: uuid("id")
+    .default(sql`gen_random_uuid()`)
+    .primaryKey(),
   nom: text("nom").notNull(),
   prix: numeric("prix").notNull(),
   image: text("image").notNull(),
@@ -45,7 +49,9 @@ export const selectArticleSchema = createSelectSchema(articles);
 export const insertArticleSchema = createInsertSchema(articles);
 
 export const paiements = pgTable("paiements", {
-  id: uuid("id").primaryKey(),
+  id: uuid("id")
+    .default(sql`gen_random_uuid()`)
+    .primaryKey(),
   user: uuid("user")
     .references(() => users.id)
     .notNull(),
@@ -63,7 +69,9 @@ export const selectPaiementSchema = createSelectSchema(paiements);
 export const insertPaiementSchema = createInsertSchema(paiements);
 
 export const presences = pgTable("presences", {
-  id: uuid("id").primaryKey(),
+  id: uuid("id")
+    .default(sql`gen_random_uuid()`)
+    .primaryKey(),
   user: uuid("user")
     .references(() => users.id)
     .notNull(),

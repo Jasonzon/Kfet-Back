@@ -98,20 +98,22 @@ router.get(
 
 router.post(
   "/",
-  auth,
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       const allUsers = await db
         .select()
         .from(users)
         .where(eq(users.mail, req.body.mail));
-      if (allUsers.length === 0) {
-        const user = insertUserSchema.parse(req.body);
-        await db.insert(users).values(user);
+      if (allUsers.length !== 0) {
+        return res
+          .status(HTTP_FORBIDDEN)
+          .json({ message: "Mail déjà utilisé" });
       }
-      const user = allUsers[0];
-      const token = jwtGenerator(user.id, user.role, user.mail);
-      return res.status(HTTP_OK).json({ user, token });
+      const user = insertUserSchema.parse({ ...req.body, role: "basic" });
+      const newUsers = await db.insert(users).values(user).returning();
+      const newUser = newUsers[0];
+      const token = jwtGenerator(newUser.id, newUser.role, newUser.mail);
+      return res.status(HTTP_OK).json({ user: newUser, token });
     } catch (error) {
       console.error(error);
       return res.sendStatus(HTTP_SERVER_ERROR);
