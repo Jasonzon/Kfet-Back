@@ -109,7 +109,14 @@ router.post(
           .status(HTTP_FORBIDDEN)
           .json({ message: "Mail déjà utilisé" });
       }
-      const user = insertUserSchema.parse({ ...req.body, role: "basic" });
+      const saltRound = 10;
+      const salt = await bcrypt.genSalt(saltRound);
+      const bcryptPassword = await bcrypt.hash(req.body.password, salt);
+      const user = insertUserSchema.parse({
+        ...req.body,
+        password: bcryptPassword,
+        role: "basic",
+      });
       const newUsers = await db.insert(users).values(user).returning();
       const newUser = newUsers[0];
       const token = jwtGenerator(newUser.id, newUser.role, newUser.mail);
