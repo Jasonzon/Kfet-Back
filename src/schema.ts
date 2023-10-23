@@ -5,7 +5,7 @@ import {
   text,
   varchar,
   pgEnum,
-  date,
+  timestamp,
   real,
   integer,
 } from "drizzle-orm/pg-core";
@@ -62,14 +62,19 @@ export const paiements = pgTable("paiements", {
     .array()
     .notNull(),
   montant: real("montant").notNull(),
-  envoi: date("envoi").notNull(),
-  validation: date("validation"),
+  envoi: timestamp("envoi").defaultNow(),
+  validation: timestamp("validation"),
 });
 
 export type Paiement = InferSelectModel<typeof paiements>;
 export type NewPaiement = InferInsertModel<typeof paiements>;
 export const selectPaiementSchema = createSelectSchema(paiements);
 export const insertPaiementSchema = createInsertSchema(paiements);
+export const newPaiementSchema = insertPaiementSchema.pick({
+  articles: true,
+  montant: true,
+  envoi: true,
+});
 export const updatePaiementSchema = insertPaiementSchema.pick({
   vendeur: true,
   validation: true,
@@ -82,14 +87,17 @@ export const presences = pgTable("presences", {
   user: uuid("user")
     .references(() => users.id)
     .notNull(),
-  debut: date("debut").notNull(),
-  fin: date("fin"),
+  debut: timestamp("debut").defaultNow(),
+  fin: timestamp("fin"),
 });
 
 export type Presence = InferSelectModel<typeof presences>;
 export type NewPresence = InferInsertModel<typeof presences>;
 export const selectPresenceSchema = createSelectSchema(presences);
 export const insertPresenceSchema = createInsertSchema(presences);
+export const newPresenceSchema = insertPresenceSchema.pick({
+  debut: true,
+});
 export const updatePresenceSchema = insertPresenceSchema.pick({
   fin: true,
 });

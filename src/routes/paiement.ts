@@ -11,9 +11,9 @@ import {
 import db from "../db.js";
 import {
   paiements,
-  insertPaiementSchema,
   users,
   updatePaiementSchema,
+  newPaiementSchema,
 } from "../schema.js";
 import { eq, sql } from "drizzle-orm";
 
@@ -70,11 +70,10 @@ router.post(
   auth,
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      const paiement = insertPaiementSchema.parse({
+      const paiement = newPaiementSchema.parse({
         ...req.body,
-        user: req.user,
       });
-      await db.insert(paiements).values(paiement);
+      await db.insert(paiements).values({ ...paiement, user: req.user });
       return res.status(HTTP_OK).json({ message: "Paiement ajouté !" });
     } catch (error: any) {
       console.error(error.message);
@@ -100,7 +99,7 @@ router.put(
           .status(HTTP_NOT_FOUND)
           .json({ message: "Paiement non trouvé" });
       }
-      const paiement = updatePaiementSchema.parse(req.body);
+      const paiement = updatePaiementSchema.parse({ ...req.body });
       await db
         .update(paiements)
         .set(paiement)

@@ -14,6 +14,7 @@ import {
   insertPresenceSchema,
   users,
   updatePresenceSchema,
+  newPresenceSchema,
 } from "../schema.js";
 import { eq, isNull } from "drizzle-orm";
 
@@ -45,11 +46,7 @@ router.post(
       if (req.role !== "admin") {
         return res.status(HTTP_FORBIDDEN).json({ message: "Non autorisé" });
       }
-      const presence = insertPresenceSchema.parse({
-        ...req.body,
-        user: req.user,
-      });
-      await db.insert(presences).values(presence);
+      await db.insert(presences).values({ user: req.user });
       return res.status(HTTP_OK).json({ message: "Presence ajouté !" });
     } catch (error: any) {
       console.error(error.message);
