@@ -9,13 +9,7 @@ import {
   HTTP_SERVER_ERROR,
 } from "../utils/status.js";
 import db from "../db.js";
-import {
-  presences,
-  insertPresenceSchema,
-  users,
-  updatePresenceSchema,
-  newPresenceSchema,
-} from "../schema.js";
+import { presences, users, updatePresenceSchema } from "../schema.js";
 import { eq, isNull } from "drizzle-orm";
 
 const router = express.Router();

@@ -73,7 +73,6 @@ export const insertPaiementSchema = createInsertSchema(paiements);
 export const newPaiementSchema = insertPaiementSchema.pick({
   articles: true,
   montant: true,
-  envoi: true,
 });
 export const updatePaiementSchema = insertPaiementSchema.pick({
   vendeur: true,
@@ -95,9 +94,6 @@ export type Presence = InferSelectModel<typeof presences>;
 export type NewPresence = InferInsertModel<typeof presences>;
 export const selectPresenceSchema = createSelectSchema(presences);
 export const insertPresenceSchema = createInsertSchema(presences);
-export const newPresenceSchema = insertPresenceSchema.pick({
-  debut: true,
-});
 export const updatePresenceSchema = insertPresenceSchema.pick({
   fin: true,
 });
