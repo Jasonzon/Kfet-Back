@@ -9,7 +9,12 @@ import {
   HTTP_SERVER_ERROR,
 } from "../utils/status.js";
 import db from "../db.js";
-import { paiements, insertPaiementSchema, users } from "../schema.js";
+import {
+  paiements,
+  insertPaiementSchema,
+  users,
+  updatePaiementSchema,
+} from "../schema.js";
 import { eq, sql } from "drizzle-orm";
 
 const router = express.Router();
@@ -20,10 +25,18 @@ router.get(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (req.role !== "admin") {
-        return res.status(HTTP_FORBIDDEN).json({ message: "Non autorisé" });
+        const allPaiements = await db
+          .select()
+          .from(paiements)
+          .innerJoin(users, eq(paiements.user, users.id));
+        return res.status(HTTP_OK).json(allPaiements);
       }
-      const allPaiements = await db.select().from(paiements);
-      return res.status(HTTP_OK).json(allPaiements);
+      const userPaiements = await db
+        .select()
+        .from(paiements)
+        .innerJoin(users, eq(paiements.user, users.id))
+        .where(eq(paiements.user, req.user));
+      return res.status(HTTP_OK).json(userPaiements);
     } catch (error: any) {
       console.error(error.message);
       return res.status(HTTP_SERVER_ERROR).json({ error });
@@ -87,8 +100,11 @@ router.put(
           .status(HTTP_NOT_FOUND)
           .json({ message: "Paiement non trouvé" });
       }
-      const paiement = insertPaiementSchema.parse(req.body);
-      await db.update(paiements).set(paiement);
+      const paiement = updatePaiementSchema.parse(req.body);
+      await db
+        .update(paiements)
+        .set(paiement)
+        .where(eq(paiements.id, req.params.id));
       return res.status(HTTP_OK).json({ message: "Paiement modifié !" });
     } catch (error: any) {
       console.error(error.message);

@@ -35,34 +35,6 @@ router.get(
 );
 
 router.get(
-  "/id/:id",
-  auth,
-  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    try {
-      if (
-        req.role !== "admin" ||
-        req.params.id.toString() !== req.user.toString()
-      ) {
-        return res.status(HTTP_FORBIDDEN).json({ message: "Non autorisé" });
-      }
-      const allUsers = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, req.params.id));
-      if (allUsers.length === 0) {
-        return res
-          .status(HTTP_NOT_FOUND)
-          .json({ message: "Utilisateur non trouvé" });
-      }
-      return res.status(HTTP_OK).json({ user: allUsers[0] });
-    } catch (error: any) {
-      console.error(error.message);
-      return res.status(HTTP_SERVER_ERROR).json({ error });
-    }
-  }
-);
-
-router.get(
   "/auth",
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -132,7 +104,7 @@ router.post(
   "/connect",
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      const { mail, password } = connectUserSchema.parse(req.body);
+      const { mail, password } = connectUserSchema.parse({ ...req.body });
       const allUsers = await db
         .select()
         .from(users)
@@ -176,7 +148,7 @@ router.put(
           .json({ message: "Utilisateur non trouvé" });
       }
       const user = insertUserSchema.parse(req.body);
-      await db.update(users).set(user);
+      await db.update(users).set(user).where(eq(users.id, req.params.id));
       return res.status(HTTP_OK).json({ message: "Utilisateur modifié !" });
     } catch (error: any) {
       console.error(error.message);

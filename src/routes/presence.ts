@@ -9,7 +9,12 @@ import {
   HTTP_SERVER_ERROR,
 } from "../utils/status.js";
 import db from "../db.js";
-import { presences, insertPresenceSchema, users } from "../schema.js";
+import {
+  presences,
+  insertPresenceSchema,
+  users,
+  updatePresenceSchema,
+} from "../schema.js";
 import { eq, isNull } from "drizzle-orm";
 
 const router = express.Router();
@@ -22,8 +27,8 @@ router.get(
       const allPresences = await db
         .select()
         .from(presences)
-        .where(isNull(presences.fin))
-        .innerJoin(users, eq(presences.user, users.id));
+        .innerJoin(users, eq(presences.user, users.id))
+        .where(isNull(presences.fin));
       return res.status(HTTP_OK).json(allPresences);
     } catch (error: any) {
       console.error(error.message);
@@ -70,11 +75,13 @@ router.put(
           .status(HTTP_NOT_FOUND)
           .json({ message: "Presence non trouvé" });
       }
-      const presence = insertPresenceSchema.parse({
+      const presence = updatePresenceSchema.parse({
         ...req.body,
-        user: req.user,
       });
-      await db.update(presences).set({ fin: presence.fin });
+      await db
+        .update(presences)
+        .set({ ...presence })
+        .where(eq(presences.id, req.params.id));
       return res.status(HTTP_OK).json({ message: "Presence modifié !" });
     } catch (error: any) {
       console.error(error.message);

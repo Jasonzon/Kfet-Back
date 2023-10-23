@@ -70,6 +70,10 @@ export type Paiement = InferSelectModel<typeof paiements>;
 export type NewPaiement = InferInsertModel<typeof paiements>;
 export const selectPaiementSchema = createSelectSchema(paiements);
 export const insertPaiementSchema = createInsertSchema(paiements);
+export const updatePaiementSchema = insertPaiementSchema.pick({
+  vendeur: true,
+  validation: true,
+});
 
 export const presences = pgTable("presences", {
   id: uuid("id")
@@ -86,3 +90,6 @@ export type Presence = InferSelectModel<typeof presences>;
 export type NewPresence = InferInsertModel<typeof presences>;
 export const selectPresenceSchema = createSelectSchema(presences);
 export const insertPresenceSchema = createInsertSchema(presences);
+export const updatePresenceSchema = insertPresenceSchema.pick({
+  fin: true,
+});

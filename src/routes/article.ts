@@ -27,28 +27,6 @@ router.get(
   }
 );
 
-router.get(
-  "/:id",
-  auth,
-  async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    try {
-      const allArticles = await db
-        .select()
-        .from(articles)
-        .where(eq(articles.id, req.params.id));
-      if (allArticles.length === 0) {
-        return res
-          .status(HTTP_NOT_FOUND)
-          .json({ message: "Article non trouvé" });
-      }
-      return res.status(HTTP_OK).json({ article: allArticles[0] });
-    } catch (error: any) {
-      console.error(error.message);
-      return res.status(HTTP_SERVER_ERROR).json({ error });
-    }
-  }
-);
-
 router.post(
   "/",
   auth,
@@ -85,7 +63,10 @@ router.put(
           .json({ message: "Article non trouvé" });
       }
       const article = insertArticleSchema.parse(req.body);
-      await db.update(articles).set(article);
+      await db
+        .update(articles)
+        .set(article)
+        .where(eq(articles.id, req.params.id));
       return res.status(HTTP_OK).json({ message: "Article modifié !" });
     } catch (error: any) {
       console.error(error.message);
