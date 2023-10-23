@@ -5,8 +5,9 @@ import {
   text,
   varchar,
   pgEnum,
-  numeric,
   date,
+  real,
+  integer,
 } from "drizzle-orm/pg-core";
 import { createSelectSchema, createInsertSchema } from "drizzle-zod";
 
@@ -22,7 +23,7 @@ export const users = pgTable("users", {
   mail: varchar("mail", { length: 256 }).notNull(),
   role: role("role").notNull(),
   password: text("password").notNull(),
-  tampons: numeric("tampons").default("0").notNull(),
+  tampons: integer("tampons").default(0).notNull(),
 });
 
 export type User = InferSelectModel<typeof users>;
@@ -39,7 +40,7 @@ export const articles = pgTable("articles", {
     .default(sql`gen_random_uuid()`)
     .primaryKey(),
   nom: text("nom").notNull(),
-  prix: numeric("prix").notNull(),
+  prix: real("prix").notNull(),
   image: text("image").notNull(),
 });
 

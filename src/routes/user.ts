@@ -70,10 +70,12 @@ router.get(
       if (!jwtToken) {
         return res.status(HTTP_FORBIDDEN).json({ message: "Pas de token" });
       }
+      console.log("token:", jwtToken);
       jwt.verify(
         jwtToken,
         process.env.jwtSecret!,
         async function (err, payload) {
+          console.log(err, payload);
           if (err) {
             return res.status(HTTP_FORBIDDEN).json({ message: "Non autorisé" });
           }

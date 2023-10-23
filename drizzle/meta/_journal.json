@@ -29,6 +29,13 @@
       "when": 1697842831156,
       "tag": "0003_reflective_starhawk",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1698048388769,
+      "tag": "0004_closed_vision",
+      "breakpoints": true
     }
   ]
 }
