@@ -57,11 +57,13 @@ export const paiements = pgTable("paiements", {
     .references(() => users.id)
     .notNull(),
   vendeur: uuid("vendeur").references(() => users.id),
-  article: uuid("article")
+  articles: uuid("articles")
     .references(() => articles.id)
+    .array()
     .notNull(),
+  montant: real("montant").notNull(),
   envoi: date("envoi").notNull(),
-  validation: date("validation").notNull(),
+  validation: date("validation"),
 });
 
 export type Paiement = InferSelectModel<typeof paiements>;

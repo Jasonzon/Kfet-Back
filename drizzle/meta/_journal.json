@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1697660993781,
-      "tag": "0000_third_justin_hammer",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1697708237611,
-      "tag": "0001_cheerful_edwin_jarvis",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1697709516587,
-      "tag": "0002_mysterious_catseye",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1697842831156,
-      "tag": "0003_reflective_starhawk",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1698048388769,
-      "tag": "0004_closed_vision",
+      "when": 1698061509041,
+      "tag": "0000_parched_abomination",
       "breakpoints": true
     }
   ]

@@ -10,7 +10,7 @@ import {
 } from "../utils/status.js";
 import db from "../db.js";
 import { paiements, insertPaiementSchema, users } from "../schema.js";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 const router = express.Router();
 
@@ -37,7 +37,10 @@ router.get(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       const allPaiements = await db
-        .select()
+        .select({
+          user: paiements.user,
+          total: sql<number>`sum(${paiements.montant})`.as("total"),
+        })
         .from(paiements)
         .innerJoin(users, eq(users.id, paiements.user))
         .groupBy(paiements.user);
