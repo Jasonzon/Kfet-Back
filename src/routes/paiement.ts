@@ -24,15 +24,45 @@ router.get(
   auth,
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      if (req.role !== "admin") {
+      if (req.role === "admin") {
         const allPaiements = await db
-          .select()
+          .select({
+            id: paiements.id,
+            envoi: paiements.envoi,
+            montant: paiements.montant,
+            vendeur: paiements.vendeur,
+            validation: paiements.validation,
+            articles: paiements.articles,
+            user: paiements.user,
+            nom: users.nom,
+            prenom: users.prenom,
+            role: users.role,
+            mail: users.mail,
+            tel: users.tel,
+            password: users.password,
+            tampons: users.tampons,
+          })
           .from(paiements)
           .innerJoin(users, eq(paiements.user, users.id));
         return res.status(HTTP_OK).json(allPaiements);
       }
       const userPaiements = await db
-        .select()
+        .select({
+          id: paiements.id,
+          envoi: paiements.envoi,
+          montant: paiements.montant,
+          vendeur: paiements.vendeur,
+          validation: paiements.validation,
+          articles: paiements.articles,
+          user: paiements.user,
+          nom: users.nom,
+          prenom: users.prenom,
+          role: users.role,
+          mail: users.mail,
+          tel: users.tel,
+          password: users.password,
+          tampons: users.tampons,
+        })
         .from(paiements)
         .innerJoin(users, eq(paiements.user, users.id))
         .where(eq(paiements.user, req.user));

@@ -20,7 +20,19 @@ router.get(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       const allPresences = await db
-        .select()
+        .select({
+          id: presences.id,
+          debut: presences.debut,
+          fin: presences.fin,
+          user: presences.user,
+          nom: users.nom,
+          prenom: users.prenom,
+          role: users.role,
+          mail: users.mail,
+          tel: users.tel,
+          password: users.password,
+          tampons: users.tampons,
+        })
         .from(presences)
         .innerJoin(users, eq(presences.user, users.id))
         .where(isNull(presences.fin));
