@@ -25,46 +25,12 @@ router.get(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (req.role === "admin") {
-        const allPaiements = await db
-          .select({
-            id: paiements.id,
-            envoi: paiements.envoi,
-            montant: paiements.montant,
-            vendeur: paiements.vendeur,
-            validation: paiements.validation,
-            articles: paiements.articles,
-            user: paiements.user,
-            nom: users.nom,
-            prenom: users.prenom,
-            role: users.role,
-            mail: users.mail,
-            tel: users.tel,
-            password: users.password,
-            tampons: users.tampons,
-          })
-          .from(paiements)
-          .innerJoin(users, eq(paiements.user, users.id));
+        const allPaiements = await db.select().from(paiements);
         return res.status(HTTP_OK).json(allPaiements);
       }
       const userPaiements = await db
-        .select({
-          id: paiements.id,
-          envoi: paiements.envoi,
-          montant: paiements.montant,
-          vendeur: paiements.vendeur,
-          validation: paiements.validation,
-          articles: paiements.articles,
-          user: paiements.user,
-          nom: users.nom,
-          prenom: users.prenom,
-          role: users.role,
-          mail: users.mail,
-          tel: users.tel,
-          password: users.password,
-          tampons: users.tampons,
-        })
+        .select()
         .from(paiements)
-        .innerJoin(users, eq(paiements.user, users.id))
         .where(eq(paiements.user, req.user));
       return res.status(HTTP_OK).json(userPaiements);
     } catch (error: any) {
@@ -85,7 +51,6 @@ router.get(
           total: sql<number>`sum(${paiements.montant})`.as("total"),
         })
         .from(paiements)
-        .innerJoin(users, eq(users.id, paiements.user))
         .groupBy(paiements.user);
       return res.status(HTTP_OK).json(allPaiements);
     } catch (error: any) {
@@ -147,10 +112,20 @@ router.delete(
   auth,
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      if (req.user.toString() !== req.body.user.toString()) {
+      const { id } = req.params;
+      const allPaiements = await db
+        .select()
+        .from(paiements)
+        .where(eq(paiements.id, id));
+      if (allPaiements.length === 0) {
+        return res
+          .status(HTTP_NOT_FOUND)
+          .json({ message: "Paiement non trouvé" });
+      }
+      const paiement = allPaiements[0];
+      if (req.user.toString() !== paiement.user.toString()) {
         return res.status(HTTP_FORBIDDEN).json({ message: "Non autorisé" });
       }
-      const { id } = req.params;
       await db.delete(paiements).where(eq(paiements.id, id));
     } catch (error: any) {
       console.error(error.message);

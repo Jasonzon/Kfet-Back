@@ -7,5 +7,5 @@ export function jwtGenerator(userId: string, role: string, mail: string) {
     role,
     mail,
   };
-  return jwt.sign(payload, process.env.jwtSecret!, { expiresIn: "12hr" });
+  return jwt.sign(payload, process.env.jwtSecret!, { expiresIn: "7d" });
 }
