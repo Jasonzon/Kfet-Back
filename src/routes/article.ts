@@ -85,6 +85,7 @@ router.delete(
       }
       const { id } = req.params;
       await db.delete(articles).where(eq(articles.id, id));
+      return res.status(HTTP_OK).json({ message: "Deleted !" });
     } catch (error: any) {
       console.error(error.message);
       return res.status(HTTP_SERVER_ERROR).json({ error });

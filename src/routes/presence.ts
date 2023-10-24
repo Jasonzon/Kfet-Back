@@ -9,7 +9,7 @@ import {
   HTTP_SERVER_ERROR,
 } from "../utils/status.js";
 import db from "../db.js";
-import { presences, users, updatePresenceSchema } from "../schema.js";
+import { presences } from "../schema.js";
 import { eq, isNull } from "drizzle-orm";
 
 const router = express.Router();
@@ -65,12 +65,9 @@ router.put(
           .status(HTTP_NOT_FOUND)
           .json({ message: "Presence non trouvé" });
       }
-      const presence = updatePresenceSchema.parse({
-        ...req.body,
-      });
       await db
         .update(presences)
-        .set({ ...presence, fin: new Date(presence.fin as Date) })
+        .set({ fin: new Date() })
         .where(eq(presences.id, req.params.id));
       return res.status(HTTP_OK).json({ message: "Presence modifié !" });
     } catch (error: any) {
@@ -90,6 +87,7 @@ router.delete(
       }
       const { id } = req.params;
       await db.delete(presences).where(eq(presences.id, id));
+      return res.status(HTTP_OK).json({ message: "Deleted !" });
     } catch (error: any) {
       console.error(error.message);
       return res.status(HTTP_SERVER_ERROR).json({ error });

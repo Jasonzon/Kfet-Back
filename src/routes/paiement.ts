@@ -9,13 +9,8 @@ import {
   HTTP_SERVER_ERROR,
 } from "../utils/status.js";
 import db from "../db.js";
-import {
-  paiements,
-  users,
-  updatePaiementSchema,
-  newPaiementSchema,
-} from "../schema.js";
-import { eq, sql } from "drizzle-orm";
+import { paiements, newPaiementSchema } from "../schema.js";
+import { eq, isNotNull, sql } from "drizzle-orm";
 
 const router = express.Router();
 
@@ -51,6 +46,7 @@ router.get(
           total: sql<number>`sum(${paiements.montant})`.as("total"),
         })
         .from(paiements)
+        .where(isNotNull(paiements.validation))
         .groupBy(paiements.user);
       return res.status(HTTP_OK).json(allPaiements);
     } catch (error: any) {
@@ -94,10 +90,9 @@ router.put(
           .status(HTTP_NOT_FOUND)
           .json({ message: "Paiement non trouvé" });
       }
-      const paiement = updatePaiementSchema.parse({ ...req.body });
       await db
         .update(paiements)
-        .set(paiement)
+        .set({ validation: new Date(), vendeur: req.user })
         .where(eq(paiements.id, req.params.id));
       return res.status(HTTP_OK).json({ message: "Paiement modifié !" });
     } catch (error: any) {
@@ -127,6 +122,7 @@ router.delete(
         return res.status(HTTP_FORBIDDEN).json({ message: "Non autorisé" });
       }
       await db.delete(paiements).where(eq(paiements.id, id));
+      return res.status(HTTP_OK).json({ message: "Deleted !" });
     } catch (error: any) {
       console.error(error.message);
       return res.status(HTTP_SERVER_ERROR).json({ error });
